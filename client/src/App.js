@@ -1,32 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import axios from 'axios';
+import Gmail from './Gmail';
 function App() {
-	useEffect(() => {
-		const fetchResult = async () => {
-			const result = await axios.get('/');
-			console.log(result);
-		};
-		fetchResult();
-	}, []); // empty array as second argument triggers only once on component mounting
+	const [emails, setEmails] = useState([]);
+
+	const fetchEmails = async () => {
+		try {
+			// Request authentication and obtain access token
+			const response = await axios.get('/api/gmail');
+			console.log(response);
+			const authUrl = response?.data;
+			console.log(authUrl);
+
+			// Open a new window for authentication
+			const authWindow = window.open(authUrl, '_blank');
+
+			// Listen for authentication success message
+			window.addEventListener('message', async (event) => {
+				if (
+					event.origin === window.location.origin &&
+					event.data === 'authenticated'
+				) {
+					// Fetch emails with the obtained access token
+					const emailsResponse = await axios.get('/oauth2callback');
+					const data = await emailsResponse.json();
+					console.log(data);
+					setEmails(data.messages);
+				}
+			});
+
+			// Close the authentication window after successful authentication
+			authWindow.addEventListener('unload', () => {
+				if (!emails.length) {
+					// Handle case where the user closed the window without authenticating
+					console.log('Authentication window closed without authentication');
+				}
+			});
+		} catch (error) {
+			console.log('Error fetching emails:', error);
+		}
+	};
 
 	return (
-		<div className='App'>
-			<header className='App-header'>
-				<img src={logo} className='App-logo' alt='logo' />
-				<p>
-					Edit <code>src/App.js</code> and save to reload.
-				</p>
-				<a
-					className='App-link'
-					href='https://reactjs.org'
-					target='_blank'
-					rel='noopener noreferrer'
-				>
-					Learn React
-				</a>
-			</header>
+		<div>
+			<Router>
+				<Routes>
+					<Route
+						path='/'
+						element={<button onClick={fetchEmails}>Fetch Emails</button>}
+					/>
+					<Route path='/getMails' element={<Gmail emails={emails} />} />
+				</Routes>
+			</Router>
 		</div>
 	);
 }
