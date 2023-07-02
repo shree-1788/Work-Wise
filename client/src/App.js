@@ -1,3 +1,4 @@
+
 import "./App.css";
 import Dashboard from "./dashboard";
 
@@ -7,6 +8,7 @@ function App() {
       <Dashboard />
     </div>
   );
+
 }
 
 export default App;
