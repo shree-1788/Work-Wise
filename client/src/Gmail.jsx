@@ -52,7 +52,6 @@ const Gmail = ({}) => {
 	return (
 		<div>
 			Gmail
-			<h1>Emails</h1>
 			<button
 				style={{
 					backgroundColor: 'blue',

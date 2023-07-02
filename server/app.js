@@ -101,10 +101,10 @@ app.get('/oauth2callback', async (req, res) => {
 			const body = email.data.snippet;
 			const prompt = `email:${body} 
 				details:please find the following details Company Name, Location, Job ld, Status`;
-			const response = await gptResponse(prompt);
-			console.log(response);
+			// const response = await gptResponse(prompt);
+			// console.log(response);
 			const emailDocRef = emailsCollection.doc(threadId);
-			await emailDocRef.set({ message: response });
+			await emailDocRef.set({ message: body });
 			conversations.push(email.data.snippet);
 		}
 
